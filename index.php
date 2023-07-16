@@ -15,13 +15,14 @@ header('Cache-Control: no-store');
 // // if ends in slash, consider it a full path and create a random filename
 // // if not ends in slash, consider last part is the filename
 // else
-// if has a name, consider it the filename
+// //if has a name, consider it the filename
+// //else create a random file
 //
 // tests
 // @/ -> new file
 // @/file1 -> open file1
 // @/folder1/ -> creates folder1 and new file
-// @/folder1/file1 -> open file1 from folder1 OK
+// @/folder1/file1 -> open file1 from folder1
 // @/folder1/folder2/ -> creates folder1/folder2 and new file
 // @/folder1/folder2/file1 -> open file1 from folder1/folder2
 //
@@ -149,22 +150,27 @@ function showTree($path) {
     }
 
     // Finally, we have our ordered list, so display in a UL
-    echo '<ul><li>/</li>';
+    echo '<ul><li><a href="https://notes.orga.cat">dontpad</a></li>';
     $lastPath = '';
-    for ($i = 0; $i<count($finalArray);
-    $i++) {
+    for ($i = 0; $i<count($finalArray);$i++) {
         $fileFolderName = $finalArray[$i];
         $thisDepth = count(explode('/', $fileFolderName));
         $lastDepth = count(explode('/', $lastPath));
         if ($thisDepth > $lastDepth) {
-            echo '<ul>\n';
+            echo '<ul>';
         }
         if ($thisDepth < $lastDepth) {
             for ($j = $lastDepth; $j>$thisDepth; $j--) {
                 echo '</ul>';
             }
         }
-        echo '<li>'.basename($fileFolderName).'</li>';
+
+        $fullPath = '/path/your/hosting/_tmp' . $fileFolderName;
+        if (is_dir($fullPath)) {
+            echo '<li>'. basename($fileFolderName) .'&nbsp;&nbsp;<span class="to-rename" data-href="https://notes.orga.cat'. $fileFolderName . '"><i class="fa-regular fa-pen-to-square"></i></span>&nbsp;&nbsp;<span class="to-delete" data-href="https://notes.orga.cat'. $fileFolderName . '"><i class="fa-regular fa-trash-can"></i></span></li>';        }
+        else{
+            echo '<li><a href="https://notes.orga.cat'. $fileFolderName . '">'. basename($fileFolderName) .'</a>&nbsp;&nbsp;<span class="to-rename" data-href="https://notes.orga.cat'. $fileFolderName . '"><i class="fa-regular fa-pen-to-square"></i></span>&nbsp;&nbsp;<span class="to-delete" data-href="https://notes.orga.cat'. $fileFolderName . '"><i class="fa-regular fa-trash-can"></i></span></li>';
+        }
         $lastPath = $fileFolderName;
     }
     echo '</ul></ul>';
@@ -184,13 +190,14 @@ function showTree($path) {
     <link rel='preconnect' href='https://fonts.googleapis.com'>
     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
     <link href='https://fonts.googleapis.com/css2?family=Roboto&display=swap' rel='stylesheet'>
+    <script src="https://kit.fontawesome.com/fd5735ee1a.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
     <div class='left'>
         <span>
             <?php
-                $rootDirectory = '/path/your/folder/_tmp';
+                $rootDirectory = '/path/your/hosting/_tmp';
                 showTree($rootDirectory);
                 ?>
         </span>
@@ -198,8 +205,93 @@ function showTree($path) {
     <div class='right'>
         <textarea id='content'><?php if (is_file($path)) {print htmlspecialchars(file_get_contents($path), ENT_QUOTES, 'UTF-8');}?></textarea>
         <pre id='printable'></pre>
+        <footer>
+            <i>tweaks from <a class="ad" target="_blank" href="https://github.com/pereorga/minimalist-web-notepad">minimalist-web-notepad</a></i>
+        </footer>
     </div>
-    <script src="script.js"></script>
+    <script src="<?php print $base_url; ?>/script.js"></script>
+    <script>
+        var spanDelete = document.querySelectorAll(".to-delete");
+
+        spanDelete.forEach(function(span) {
+            span.addEventListener("click", function(event){
+                event.preventDefault();
+                handleDelete(span.dataset.href);
+            });
+        });
+
+        var spanRename = document.querySelectorAll(".to-rename");
+
+        spanRename.forEach(function(span) {
+            span.addEventListener("click", function(event){
+                event.preventDefault();
+                handleRename(span.dataset.href);
+            });
+        });
+
+        function handleDelete(href){
+            var fullPathWithFilename = href.replace("https://notes.orga.cat/", "/path/your/hosting/_tmp/");
+            if(confirm("Delete this file?")){
+                deleteFile(fullPathWithFilename);
+            }
+        }
+
+        function deleteFile(oldName) {
+            fetch("delete.php", {
+                method: "POST",
+                body: JSON.stringify({
+                    oldName: oldName
+                }),
+                headers: {
+                    "Content-type": "application/json"
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                    console.log(data);
+                    window.location.replace("https://notes.orga.cat/");
+                }
+            )
+            .catch(error => console.error('Error:',error))
+        }
+
+        function handleRename(href){
+            var rootDirectory = "/path/your/hosting/_tmp";
+            var splitHref = href.split("/");
+            var fullPathWithFilename = href.replace("https://notes.orga.cat/", "/path/your/hosting/_tmp/");
+            var filename = splitHref[splitHref.length - 1];
+            var userInput = prompt("New name", filename);
+            if (userInput == null || userInput == "") {
+                return;
+            } 
+            else {
+                var newHref = href.replace(filename, userInput);
+                var newFullPathWithFilename = fullPathWithFilename.replace(filename, userInput);
+                renameFile(fullPathWithFilename, newFullPathWithFilename, newHref);
+            }
+        }
+
+        function renameFile(oldName, newName, location) {
+            fetch("rename.php", {
+                method: "POST",
+                body: JSON.stringify({
+                    oldName: oldName,
+                    newName: newName
+                }),
+                headers: {
+                    "Content-type": "application/json"
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                    console.log(data);
+                    window.location.replace(location);
+                }
+            )
+            .catch(error => console.error('Error:',error))
+        }
+    </script>
 </body>
 
 </html>
+
