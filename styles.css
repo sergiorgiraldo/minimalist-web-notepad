@@ -1,5 +1,21 @@
 /*! Minimalist Web Notepad | https://github.com/pereorga/minimalist-web-notepad */
 
+/* Markdown editor */
+.CodeMirror{
+    background-color: #282923 !important;
+    color: #ffffff !important;
+    border: 0.5px solid olive !important;
+    height: 95% !important;
+
+}
+.CodeMirror-cursor {
+    border-left: 1px solid #ffffff !important;
+  }
+.CodeMirror .CodeMirror-code .cm-comment{
+    background: lightslategray !important;
+  }
+/* *************** */
+
 body {
     margin: 0;
     padding: 0;
@@ -9,9 +25,10 @@ body {
 }
 
 .left {
-    width: 20%;
+    width: 15%;
     height: 100%;
     box-sizing: border-box;
+    display: block;
 }
 
 a, a:link, a:visited{
@@ -53,7 +70,7 @@ span{
 }
 
 .right {
-    width: 80%;
+    width: 85%;
     height: 100%;
     padding: 20px;
     box-sizing: border-box;
@@ -62,13 +79,12 @@ span{
 #content {
     margin: 0;
     padding: 20px;
-    overflow-y: auto;
+    /* overflow-y: auto; */
     resize: none;
     width: 100%;
     height: 98%;
     min-height: 98%;
     box-sizing: border-box;
-    border: 1px #ddd solid;
     outline: none;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 16px;
