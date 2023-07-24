@@ -197,7 +197,7 @@ function showTree($path) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js" crossorigin="anonymous"></script>
     
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="<?php print $base_url; ?>/styles.css">
 </head>
 
 <body>
@@ -219,7 +219,7 @@ function showTree($path) {
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script src="<?php print $base_url; ?>/script.js"></script>
 </body>
 
 </html>
