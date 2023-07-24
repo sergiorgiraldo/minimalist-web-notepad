@@ -123,10 +123,14 @@ span{
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px){
     /* mobile */
     .left{
-        display:none;
+        display:none !important;
     }
 
     .right{
-        width: 98%;
+        width: 100%  !important;
+    }
+
+    #toggle, footer>br{
+        display: none;
     }
 }
